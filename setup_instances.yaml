@@ -1,6 +1,6 @@
 ---
 
-- name: Configure Docker
+- name: Install & Configure Docker
   hosts:
     - security_group_webservers
   sudo: true
@@ -11,7 +11,7 @@
         -H tcp://0.0.0.0:2375
         --log-level=debug
 
-- name: Copy web app
+- name: Copy Web Pages & Supported Files
   hosts:
     - security_group_webservers
   sudo: true
@@ -23,7 +23,7 @@
     - copy: src=./web/nginx.conf dest=/opt/web/nginx.conf
     - copy: src=./web/Dockerfile dest=/opt/web/Dockerfile
 
-- name: Configure common packages
+- name: Build and Run Docker Container
   hosts:
     - security_group_webservers
   sudo: true

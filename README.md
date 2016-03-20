@@ -54,6 +54,7 @@ Ansible Playbooks for setting up an EC2 instance, Installing Docker & Running a 
 1. https://github.com/electroniceagle/ansible-dc-ec2-tutorial
 2. http://docs.ansible.com/ansible/intro_dynamic_inventory.html
 3. http://docs.ansible.com/ansible/developing_modules.html
+4. Docker Installation & Configuration - https://github.com/angstwad/docker.ubuntu
 
 ### TODOS
 
