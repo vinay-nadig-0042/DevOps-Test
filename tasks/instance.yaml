@@ -1,0 +1,33 @@
+---
+- name: search for an ami image
+  ec2_ami_search: >
+    region={{ region|default('us-east-1') }}
+    store={{ store|default('ebs') }}
+    virt={{ virt|default('hvm') }}
+    distro={{ distro|default('ubuntu') }}
+    release={{ release|default('trusty') }}
+  register: ami_data
+
+- name: debug ami image
+  debug: 'msg="{{ ami_data }}"'
+
+- name: Check if Instance already exists
+  action: check_named_instance.py name="devops-task"
+
+- name: start the ec2 instance
+  local_action:
+    module: ec2
+    state: present
+    key_name: "{{ keypair|default('mykey') }}"
+    group: "{{ securitygroup|default('mygroup') }}"
+    instance_type: "{{ instancetype|default('t2.micro')}}"
+    image: "{{ ami_data.ami }}"
+    region: "{{ region|default('us-east-1') }}"
+    wait: yes
+    instance_tags:
+        Name: "{{ name|default('myinstance')}}"
+  register: instance_data
+  when: not named_instance_present
+
+- name: debug instance start
+  debug: 'msg="{{instance_data }}"'
