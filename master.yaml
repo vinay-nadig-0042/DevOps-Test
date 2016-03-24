@@ -1,0 +1,66 @@
+#!/usr/bin/env ansible-playbook -i inventory
+---
+
+- name: Create EC2 Instance
+  hosts: localhost
+  gather_facts: true
+  connection: local
+  tasks:
+    - include: tasks/securitygroup.yaml name="webservers"
+    - include: tasks/instance.yaml name="devops-task" securitygroup="webservers" keypair="Devops_Test"
+
+- name: Update hosts
+  hosts: localhost
+  connection: local
+  tasks:
+    - action: get_instance_ip.py name="devops-task"
+
+- name: add new hostname to temporary inventory
+  hosts: localhost
+  connection: local
+  tasks:
+    - add_host: group=security_group_webservers name='{{ next_ip }}'
+
+- name: Wait for SSH Access
+  hosts: localhost
+  connection: local
+  tasks:
+    - wait_for: port=22 host="{{ next_ip }}" delay=20
+
+- name: Install & Configure Docker
+  hosts:
+    - security_group_webservers
+  sudo: true
+  gather_facts: true
+  roles:
+    - role: roles/docker.ubuntu
+      docker_opts: >
+        -H unix://
+        -H tcp://0.0.0.0:2375
+        --log-level=debug
+
+- name: Copy Web Pages & Supported Files
+  hosts:
+    - security_group_webservers
+  sudo: true
+  gather_facts: true
+  tasks:
+    - file: path=/opt/web/ state=directory mode=0755
+    - file: path=/opt/web/pages state=directory mode=0755
+    - copy: src=./web/pages/ dest=/opt/web/pages/
+    - copy: src=./web/.htpasswd dest=/opt/web/.htpasswd
+    - copy: src=./web/nginx.conf dest=/opt/web/nginx.conf
+    - copy: src=./web/Dockerfile dest=/opt/web/Dockerfile
+
+- name: Build and Run Docker Container
+  hosts:
+    - security_group_webservers
+  sudo: true
+  gather_facts: true
+  tasks:
+    - command: docker build -t nginx-with-auth .
+      args:
+        chdir: /opt/web/
+    - command: docker run -d -p 80:80 -v /opt/web/nginx.conf:/etc/nginx/nginx.conf:ro -v /opt/web/.htpasswd:/etc/.htpasswd:ro nginx-with-auth
+      args:
+        chdir: /opt/web/

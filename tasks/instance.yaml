@@ -29,5 +29,4 @@
   register: instance_data
   when: not named_instance_present
 
-- name: debug instance start
-  debug: 'msg="{{instance_data }}"'
+
