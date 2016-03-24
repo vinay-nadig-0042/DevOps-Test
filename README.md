@@ -42,9 +42,9 @@ Ansible Playbooks for setting up an EC2 instance, Installing Docker & Running a 
     export AWS_SECRET_ACCESS_KEY='AKIXXX'
     ```
 
-3. Run the Playbooks
+3. Run the Playbook
     ```
-    ansible-playbook -i ./inventory provision_instances.yaml && sleep 90 && ansible-playbook -i ./inventory setup_instances.yaml
+    ansible-playbook -i ./inventory master.yaml -vvvv
     ```
 
 4. Access the Default Page - http://&lt;public-ip-of-launched-instance&gt;/ - IP has to be accessed from the EC2 Console. TODO: Output Public IP at the end of the playbook execution.
@@ -57,13 +57,11 @@ Ansible Playbooks for setting up an EC2 instance, Installing Docker & Running a 
 4. Docker Installation & Configuration - https://github.com/angstwad/docker.ubuntu
 
 ### TODOS
-
-1. Eliminate the manual delay(sleep command) between Instance creation & Provisioning.
-2. Display EC2 Public IP at the end of the playbook execution
-3. Make region configurable(Currently only us-east-1 is supported)
+1. Display EC2 Public IP at the end of the playbook execution
+2. Make region configurable(Currently only us-east-1 is supported)
 
 ### Notes
 
 1. EC2 IP Address extracted through the [EC2 Dynamic Inventory](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script) Script.
 2. The check on whether an instance exists or not is checked through a custom module located at [library/check_named_instance.py](https://github.com/vinay-nadig-0042/DevOps-Test/blob/master/library/check_named_instance.py)
-3. The sleep command between the two playbook command is to wait for the SSH service to start running before starting provisioning. Before SSH service starts, playbook fails to connect to the Instance.
+
